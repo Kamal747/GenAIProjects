@@ -1,0 +1,8 @@
+streamlit>=1.45.0
+pinecone>=7.0.0
+sentence-transformers>=5.0.0
+groq>=0.30.0
+pypdf>=5.0.0
+torch
+torchvision
+torchaudio
