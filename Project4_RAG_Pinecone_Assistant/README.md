@@ -1,5 +1,9 @@
 # 📄 Query Documents with Pinecone
 
+## 🌐 Live Demo
+
+🔗 https://genaiprojects-elaiomzqymdq4drgnnkr4c.streamlit.app
+
 A Retrieval-Augmented Generation (RAG) application built with **Streamlit**, **Pinecone**, **Sentence Transformers**, and **Groq Llama**.
 
 The application allows users to upload PDF documents, store embeddings in Pinecone, and ask questions based only on the uploaded documents.
