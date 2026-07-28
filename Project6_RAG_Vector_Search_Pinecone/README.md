@@ -1,5 +1,9 @@
 # 🔎 Project 6: RAG Development for Unstructured Documents using Vector Search
 
+## 🌐 Live Demo
+
+🔗 https://genaiprojects-jduhezfy8qr9rvsflotf7r.streamlit.app
+
 A focused Retrieval-Augmented Generation project centered on the **retrieval
 pipeline itself** — ingesting unstructured documents, chunking them, embedding
 them, and performing vector search over **Pinecone**. Unlike a full
