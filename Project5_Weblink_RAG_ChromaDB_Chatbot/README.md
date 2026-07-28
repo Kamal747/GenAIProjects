@@ -1,5 +1,9 @@
 # 🌐 Weblink RAG Chatbot (Groq + Streamlit + LangChain + Chroma Cloud)
 
+## 🌐 Live Demo
+
+🔗 https://genaiprojects-dqsdssytuenvdo9lh4nmqn.streamlit.app
+
 A Retrieval-Augmented Generation chatbot that extracts content from multiple
 websites, embeds it, stores it in **Chroma Cloud** (hosted vector database),
 and answers user questions with conversational (session) memory — powered by
