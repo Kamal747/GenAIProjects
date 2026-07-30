@@ -106,7 +106,6 @@ if "chroma_database" not in st.session_state:
 if "ingested_urls" not in st.session_state:
     st.session_state.ingested_urls = []
 
-
 # --------------------------------------------------------------------------
 # Sidebar: setup + ingestion
 # --------------------------------------------------------------------------
