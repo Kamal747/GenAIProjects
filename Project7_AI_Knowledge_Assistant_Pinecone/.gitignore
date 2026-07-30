@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+*.manifest
+*.spec
+
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# API Keys & Secrets (NEVER commit these!)
+.env
+.env.local
+.env.production
+secrets.toml
+*.key
+
+# Streamlit
+.streamlit/secrets.toml
+
+# EasyOCR model cache
+.EasyOCR/
+
+# Sentence Transformers cache
+sentence_transformers_cache/
+
+# Uploaded documents (don't push to GitHub)
+uploads/
+documents/
+*.pdf
+*.docx
+*.xlsx
+*.csv
+*.rtf
+*.png
+*.jpg
+*.jpeg
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Logs
+*.log
+logs/
+
+# Misc
+*.tmp
+*.bak
+*.swp+-**********
