@@ -1,5 +1,7 @@
 # 🧠 AI-Powered Knowledge Assistant
 
+https://genaiprojects-9desxb94sfy3bxhkrzzgxx.streamlit.app
+
 > Built with Retrieval-Augmented Generation (RAG), LangChain and Vector Search
 
 A production-grade intelligent document Q&A system that lets you upload enterprise documents in any format and ask natural language questions — powered by Groq LLM, Pinecone Vector DB, and Sentence Transformers.
