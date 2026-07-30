@@ -1,6 +1,8 @@
 # 🧠 AI-Powered Knowledge Assistant
 
-https://genaiprojects-9desxb94sfy3bxhkrzzgxx.streamlit.app
+## 🌐 Live Demo
+
+🔗 https://genaiprojects-9desxb94sfy3bxhkrzzgxx.streamlit.app
 
 > Built with Retrieval-Augmented Generation (RAG), LangChain and Vector Search
 
