@@ -1,6 +1,10 @@
 # 🏥 Project 8: AI-Powered Multi-Agent Hospital Workflow
 ### Using LangGraph, Groq, and Streamlit
 
+## 🌐 Live Demo
+
+🔗 https://genaiprojects-mdpfmzy8shbhqdde29i94q.streamlit.app
+
 Models the **complete patient treatment lifecycle** — from admission to
 discharge — as a LangGraph state graph. Each medical specialist is an
 intelligent agent responsible for one stage of treatment, and all agents
