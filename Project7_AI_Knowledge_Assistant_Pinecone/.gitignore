@@ -1,76 +1,61 @@
-# Python
+# --- Python ---
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
+*$py.class
+*.so
 .Python
-*.egg
-*.egg-info/
-dist/
 build/
-eggs/
-parts/
-var/
-sdist/
-wheels/
-*.manifest
-*.spec
+dist/
+*.egg-info/
+.eggs/
 
-# Virtual Environment
-.venv/
+# --- Virtual environments ---
 venv/
 env/
 ENV/
-.env
+.venv/
 
-# API Keys & Secrets (NEVER commit these!)
+# --- Environment variables / secrets ---
 .env
 .env.local
-.env.production
+*.env
 secrets.toml
-*.key
-
-# Streamlit
 .streamlit/secrets.toml
 
-# EasyOCR model cache
+# --- Streamlit ---
+.streamlit/
+
+# --- NLTK data (downloaded at runtime by semantic_chunker.py) ---
+nltk_data/
+
+# --- EasyOCR model cache ---
 .EasyOCR/
+model_storage/
 
-# Sentence Transformers cache
-sentence_transformers_cache/
+# --- Sentence-Transformers / HuggingFace model cache ---
+.cache/
+*.bin
+*.pt
 
-# Uploaded documents (don't push to GitHub)
+# --- Ragas evaluation outputs ---
+eval_results/*.csv
+!eval_results/.gitkeep
+
+# --- Uploaded / processed documents (don't commit user data) ---
 uploads/
-documents/
+temp_uploads/
 *.pdf
 *.docx
 *.xlsx
 *.csv
-*.rtf
-*.png
-*.jpg
-*.jpeg
+!requirements.txt
 
-# OS Files
+# --- OS / editor junk ---
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# IDE
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
+*.swp
 
-# Jupyter
+# --- Jupyter (if you add a notebook for Ragas later) ---
 .ipynb_checkpoints/
-*.ipynb
-
-# Logs
-*.log
-logs/
-
-# Misc
-*.tmp
-*.bak
-*.swp+-**********

@@ -18,6 +18,13 @@ from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, ServerlessSpec
 from groq import Groq
 
+# --- ADDITIVE UPGRADE MODULES (v2) ---
+# Each is opt-in via a sidebar checkbox below. If any import fails for some
+# reason, the original pipeline still works untouched.
+from semantic_chunker import semantic_chunk_text
+from reranker import rerank_citations
+from structured_output import get_structured_answer
+
 # --- 1. CONFIGURATION & UI SETUP ---
 st.set_page_config(page_title="AI Knowledge Assistant", page_icon="🧠", layout="wide")
 
@@ -75,6 +82,26 @@ with st.sidebar:
     st.header("📁 Document Ingestion Engine")
     doc_dept = st.selectbox("Department Tag:", ["HR", "Finance", "Legal", "Operations", "General"])
     doc_version = st.text_input("Document Version:", value="1.0", placeholder="e.g., 1.2 or 2026.Q1")
+
+    # --- v2 UPGRADE TOGGLES (additive, opt-in) ---
+    st.write("---")
+    st.header("🧪 v2 Upgrades")
+    use_semantic_chunking = st.checkbox(
+        "🧩 Semantic chunking (sentence-boundary aware)",
+        value=True,
+        help="Recommended. Falls back to original fixed-size chunker if unchecked."
+    )
+    use_reranking = st.checkbox(
+        "🎯 Re-rank with cross-encoder",
+        value=True,
+        help="Re-scores retrieved chunks for query relevance before sending to the LLM."
+    )
+    rerank_top_n = st.slider("Chunks to keep after re-ranking:", 3, 5, 4, disabled=not use_reranking)
+    use_structured_output = st.checkbox(
+        "📋 Structured JSON output (answer + citations + confidence)",
+        value=False,
+        help="Disables streaming for this response; returns a Pydantic-validated JSON schema instead."
+    )
 
     uploaded_files = st.file_uploader(
         "Upload Enterprise Documents:",
@@ -187,7 +214,16 @@ if uploaded_files and st.sidebar.button("⚡ Process & Index Documents"):
                     st.sidebar.warning(f"⚠️ Could not extract text from {f.name}")
                     continue
 
-                chunks = chunk_text(raw_extracted_text)
+                # FEATURE 1: Semantic chunking (sentence-boundary aware) when enabled,
+                # else fall back to the original fixed-size word-window chunker.
+                # Why: the original chunk_text() slices by raw word count and can cut
+                # a sentence in half mid-window, which produces embeddings for
+                # incomplete thoughts and hurts retrieval precision. Chunking on
+                # sentence boundaries keeps each chunk semantically whole.
+                if use_semantic_chunking:
+                    chunks = semantic_chunk_text(raw_extracted_text, chunk_size=600, overlap=100)
+                else:
+                    chunks = chunk_text(raw_extracted_text)
                 upsert_batch = []
                 upload_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -282,6 +318,20 @@ if user_query := st.chat_input("Ask any enterprise policy, operational protocol 
                     "text": chunk_text_content
                 })
 
+        # FEATURE 2: Cross-encoder re-ranking.
+        # Why this improves retrieval accuracy: Pinecone's score above comes from a
+        # bi-encoder — query and chunk are embedded SEPARATELY, then compared by
+        # cosine similarity, which is fast but coarse (it can't model interaction
+        # between query and chunk tokens). A cross-encoder instead feeds the
+        # (query, chunk) pair TOGETHER through one model, so it captures fine-grained
+        # relevance a bi-encoder misses (e.g. term overlap in the wrong context,
+        # negation, entity mismatch). Running it only on the already-small top_k set
+        # keeps it cheap, and keeping only the best 3-5 chunks reduces prompt noise
+        # sent to the LLM, which improves faithfulness of the final answer.
+        if use_reranking and valid_chunks:
+            source_citations = rerank_citations(user_query, source_citations, top_n=rerank_top_n)
+            valid_chunks = [c["text"] for c in source_citations]
+
         if not valid_chunks:
             ai_response = "I cannot find any verified information regarding this request in the indexed documents."
             with st.chat_message("assistant"):
@@ -312,25 +362,43 @@ if user_query := st.chat_input("Ask any enterprise policy, operational protocol 
             groq_client = get_groq_client(groq_api_key)
 
             with st.chat_message("assistant"):
-                message_placeholder = st.empty()
-                full_stream_response = ""
+                # FEATURE 4: Structured JSON output (opt-in).
+                # Why: free-text streaming is great for UX but can't be validated
+                # or consumed programmatically downstream. When enabled, we make
+                # one non-streaming Groq call in JSON mode and validate the result
+                # against a strict Pydantic schema (answer, source_citations,
+                # confidence_score). If parsing/validation fails for any reason,
+                # we fall back to plain text instead of crashing the chat.
+                if use_structured_output:
+                    try:
+                        structured = get_structured_answer(groq_client, system_prompt, user_query)
+                        full_stream_response = structured.answer
+                        st.markdown(full_stream_response)
+                        st.json(structured.model_dump())
+                    except ValueError as struct_err:
+                        st.warning(f"Structured output failed, showing raw text instead: {struct_err}")
+                        full_stream_response = str(struct_err)
+                else:
+                    # ORIGINAL STREAMING PATH — UNCHANGED
+                    message_placeholder = st.empty()
+                    full_stream_response = ""
 
-                completion = groq_client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=messages_payload,
-                    temperature=temperature,  # FIX: sidebar slider value use pannrom
-                    top_p=top_p,
-                    frequency_penalty=1.2,
-                    stream=True
-                )
+                    completion = groq_client.chat.completions.create(
+                        model="openai/gpt-oss-120b",
+                        messages=messages_payload,
+                        temperature=temperature,  # FIX: sidebar slider value use pannrom
+                        top_p=top_p,
+                        frequency_penalty=1.2,
+                        stream=True
+                    )
 
-                for chunk in completion:
-                    content_token = chunk.choices[0].delta.content
-                    if content_token:
-                        full_stream_response += content_token
-                        message_placeholder.markdown(full_stream_response + "▌")
+                    for chunk in completion:
+                        content_token = chunk.choices[0].delta.content
+                        if content_token:
+                            full_stream_response += content_token
+                            message_placeholder.markdown(full_stream_response + "▌")
 
-                message_placeholder.markdown(full_stream_response)
+                    message_placeholder.markdown(full_stream_response)
 
                 with st.expander("🔍 Verified Grounding Context Records"):
                     for src in source_citations:

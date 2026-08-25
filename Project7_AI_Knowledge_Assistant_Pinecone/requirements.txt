@@ -21,3 +21,14 @@ pinecone-client>=3.0.0
 
 # Data Handling
 pandas>=2.1.0
+# Semantic chunking (v2 upgrade)
+nltk>=3.8.1
+
+# RAG evaluation (v2 upgrade)
+ragas==0.3.9
+datasets>=2.19.0
+langchain-groq>=0.2.0
+langchain-huggingface>=0.1.0
+
+# Structured outputs (v2 upgrade)
+pydantic>=2.5.0
