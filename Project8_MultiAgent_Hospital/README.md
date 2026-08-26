@@ -118,3 +118,50 @@ agents were visited and what each one recorded in the shared patient state.
   - A human-in-the-loop approval step before surgery is confirmed
   - Real-time monitoring with periodic re-evaluation (a loop back to Cardiologist)
   - Multi-patient support with a patient queue instead of a single intake form
+
+<!-- Append this section to Project8_MultiAgent_Hospital/README.md, after "## Notes" -->
+
+## 🧠 ReAct-style Reasoning Logging (additive)
+
+Every agent node now generates output in explicit **Thought → Action →
+Observation** form before returning its note/report:
+
+- **Thought** — the agent's stated reasoning before acting
+- **Action** — the short decision it's taking
+- **Observation** — the actual clinical note/report (what previously was
+  the entire LLM response) — this is what still flows into `PatientState`,
+  so the LangGraph nodes/edges/routing are completely unchanged
+
+Each step is parsed and logged in `react_logger.py`:
+- Printed to console in a structured block per agent call
+- Appended as one JSON line to `react_logs.jsonl` (path overridable via
+  `REACT_LOG_FILE` env var)
+
+If an LLM ever skips the format, the parser falls back to using the whole
+response as the Observation — so the workflow can never break because of
+a malformed ReAct response.
+
+**Files added:** `react_logger.py`
+**Files changed:** `project8.py` (prompts + logging calls only — no
+node/edge/state structure changed)
+
+## 🔀 Alternate Framework Version: CrewAI (`crewai_version/`)
+
+A standalone, scoped rebuild of the same hospital workflow using
+[CrewAI](https://docs.crewai.com/) instead of LangGraph — 3 of the 6
+agents (Patient Registration → General Physician → Cardiologist),
+same Groq `llama-3.1-8b-instant` model, same shared-patient-state idea
+(passed through CrewAI's task `context=[...]`).
+
+This lives entirely in `crewai_version/` and does not touch or import
+`project8.py` — the original LangGraph app is untouched.
+
+```bash
+cd crewai_version
+pip install -r requirements.txt
+export GROQ_API_KEY=gsk_...
+python crewai_hospital.py
+```
+
+**Files added:** `crewai_version/crewai_hospital.py`,
+`crewai_version/requirements.txt`
